@@ -1,0 +1,69 @@
+package {{ $conn.ID }}
+
+// This code is generated with go-afas
+// DO NOT EDIT BY HAND
+
+{{- if .ImportTime }}
+import "time"
+{{- end }}
+
+{{ $conn := .Connector }}
+// Description: {{ $conn.Description }}
+// Endpoint: {{ $conn.ID }}
+type Root{{ $conn.ID }} struct {
+    {{ $conn.Name }} struct {
+        Element struct {
+            Fields struct {
+                {{- range $f := $conn.Fields }}
+                    {{- if $f.Values }}
+                        {{- range $v := $f.Values }}
+                        // Id: {{ $v.Id }}{{"\t"}} Description: {{ $v.Description }}
+                        {{- end }}
+                    {{- end }}
+                    {{- if eq (len $f.FieldID) 33 }}
+                        {{ Title $f.Label }}{{ slice $f.FieldID 30 }} {{ Type $f.DataType }} `json:"{{ $f.FieldID }}"` // Length: {{ $f.Length }}{{"\t\t"}} Not-zero: {{ $f.Notzero }}{{"\t\t"}} Mandatory: {{ $f.Mandatory }}{{"\t"}} {{ if eq $f.DataType "decimal" -}} Decimals: {{ $f.Decimals }} {{- end }}
+                    {{- else }}
+                        {{ Title $f.Label }} {{ Type $f.DataType }} `json:"{{ $f.FieldID }}"` // Length: {{ $f.Length }}{{"\t\t"}}Not-zero: {{ $f.Notzero }}{{"\t\t"}} Mandatory: {{ $f.Mandatory }}{{"\t"}} {{ if eq $f.DataType "decimal" -}} Decimals: {{ $f.Decimals }} {{- end }}
+                    {{- end }}
+                {{- end }}
+            } `json:"Fields"`
+        } `json:"Element"`
+
+    {{- if gt (len .FlatObjects) 0 }}
+        Objects []struct {
+            {{- range $obj := $conn.Objects }}
+                {{ $conn.Name }}{{$obj.Name }} []{{ $conn.Name }}{{$obj.Name }} `json:"{{ $obj.Name }}"`
+            {{- end }}
+        } `json:"Objects"`
+    {{- end }}
+    } `json:"{{ $conn.Name }}"`
+}
+
+{{ range $key, $obj := .FlatObjects }}
+type {{ $conn.Name }}{{$obj.Name }} struct {
+    Element []struct {
+        Fields struct {
+            {{- range $f := $obj.Fields }}
+                {{- if $f.Values }}
+                    {{- range $v := $f.Values }}
+                    // Id: {{ $v.Id }}{{"\t"}} Description: {{ $v.Description }}
+                    {{- end }}
+                {{- end }}
+                {{- if eq (len $f.FieldID) 33 }}
+                    {{ Title $f.Label }}{{ slice $f.FieldID 30 }} {{ Type $f.DataType }} `json:"{{ $f.FieldID }}"` // Length: {{ $f.Length }}{{"\t\t"}} Not-zero: {{ $f.Notzero }}{{"\t\t"}} Mandatory: {{ $f.Mandatory }}{{"\t"}} {{ if eq $f.DataType "decimal" -}} Decimals: {{ $f.Decimals }} {{- end }}
+                {{- else }}
+                    {{ Title $f.Label }} {{ Type $f.DataType }} `json:"{{ $f.FieldID }}"` // Length: {{ $f.Length }}{{"\t\t"}}Not-zero: {{ $f.Notzero }}{{"\t\t"}} Mandatory: {{ $f.Mandatory }}{{"\t"}} {{ if eq $f.DataType "decimal" -}} Decimals: {{ $f.Decimals }} {{- end }}
+                {{- end }}
+            {{- end }}
+        } `json:"Fields"`
+    } `json:"Element"`
+
+{{- if gt (len $obj.Objects) 0 }}
+    Objects []struct {
+        {{- range $nobj := $obj.Objects }}
+        {{ $conn.Name }}{{ $nobj.Name }} []{{ $conn.Name }}{{ $nobj.Name }} `json:"{{ $nobj.Name }}"`
+        {{- end }}
+    } `json:"Objects"`
+{{- end }}
+}
+{{ end }}

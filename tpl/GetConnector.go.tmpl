@@ -1,0 +1,16 @@
+package getconnector 
+
+// This code is generated with go-afas
+// DO NOT EDIT BY HAND
+
+{{- if .ImportTime }}
+import "time"
+{{- end }}
+
+{{  $conn := .Connector}}
+// Endpoint: {{$conn.Name }}
+type {{ Title $conn.Name }} struct {
+    {{- range $f := $conn.Fields }}
+        {{ Title $f.ID }} {{ Type $f.DataType }} `json:"{{ $f.ID }}"` // Length: {{$f.Length}} {{ if eq $f.DataType "decimal" -}} | Decimals: {{ $f.Decimals }} {{- end }}
+    {{- end }}
+}
